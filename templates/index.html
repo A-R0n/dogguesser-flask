@@ -1,0 +1,55 @@
+<html>
+    <style>
+        .col-lg-8 {
+        position: relative;
+        top: 0;
+        left: 0;
+        }
+        .video_feed {
+        position: relative;
+        top: 0;
+        left: 0;
+        border: 1px red solid;
+        }
+        .camera_click_button {
+        position: absolute;
+        border-radius: 50%;
+        transform: scale(1);
+        transform: translate(-50%, -50%);
+	    animation: pulse 1.5s infinite;
+        width: 75px;
+        height: 75px;
+        top: 85%;
+        left: 50%;
+        border: 1px green solid;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.7);
+            }
+
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+            }
+
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+            }
+        }
+      </style>
+    <body>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <h3 class="mt-5">Live Streaming</h3>
+                    <img src="{{ url_for('video_feed') }}" class="video_feed">
+                    <img src="{{url_for('static', filename='camera_click_button.jpeg')}}" class="camera_click_button">
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
