@@ -6,183 +6,171 @@ from PIL import Image
 from timm.data import resolve_data_config
 from timm.data.transforms_factory import create_transform
 import torch
-import sys
-from flask import Flask, render_template, Response
-
-FLASK_PORT = 80
-## if port 80 doesnt work
-# FLASK_PORT = 5001
+from flask import Flask, render_template, Response, request
+import os
+from capture_image import captureImage
+from time import perf_counter
 
 app = Flask(__name__)
+global capture, switch, epoch_time,default_config
+epoch_time = None
+capture = 0
+switch=1
+default_config = {
+    'display_video_feed': 'flex',
+    'display_captured_img': 'none',
+    'epoch_time': epoch_time,
+    'imageCapturedSuccess': False
+}
+
+imagenet_classes_file = "imagenet_classes.txt"
+imagenet_classes_download = "https://raw.githubusercontent.com/pytorch/hub/master/imagenet_classes.txt"
+BGR_WHITE_COLOR = (255, 255, 255)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    global default_config
+    return render_template('index.html', data=default_config)
 
 @app.route('/video_feed')
 def video_feed():
     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
+def get_output(model, tensor):
+    with torch.no_grad():
+        return model(tensor)
+    
+def get_imagenet_classes():
+    ## if we don't already have it
+    if not os.path.isfile(imagenet_classes_file):
+        print(f'we need to download the imagenet clases from github')
+        urllib.request.urlretrieve(imagenet_classes_download, imagenet_classes_file)
+    else:
+        print(f'imagenet classes available to us locally')
+
+def structure_imagenet_classes(b):
+    with open(b, "r") as f:
+        return [s.strip() for s in f.readlines()] 
+    
+def get_most_probable(probabilities, n):
+    return torch.topk(probabilities, n)
+
+def display_results(topn_prob, topn_catid, categories):
+    for i in range(topn_prob.size(0)):
+        print(f'topn_catid {topn_catid}')
+        print(f'topn_catid at index {topn_catid[i]}')
+        try:
+            idx_category = topn_catid[i]
+            print(f'idx category {idx_category}')
+        except IndexError:
+            continue
+        if idx_category >= 151 and idx_category <= 275:
+            print(f'we found a dog')
+            try:
+                category_name = categories[idx_category]
+                prob = str(round(float(topn_prob[i].item()*100), 1)) + "%"
+                print(category_name, prob)
+            except IndexError:
+                continue
+        else:
+            break
+    try:
+        idx_category = topn_catid[i]
+        print(f'idx category {idx_category}')
+        if idx_category >= 151 and idx_category <= 275:
+            return str(categories[topn_catid[0]]).title()
+        else:
+            return 'N/A'
+    except IndexError:
+        return "Index Error"
+
+def blur_frame(frame):
+    return cv2.blur(frame, (100,100))
+
+def put_text_on_frame(frame, top_guess):
+    return cv2.putText(frame, top_guess, (200, 200), cv2.FONT_HERSHEY_SIMPLEX, 3, BGR_WHITE_COLOR, 3, cv2.LINE_AA) 
+
+def guess_dog_breed(p):
+    model = timm.create_model("inception_v3", pretrained=True)
+    model.eval()
+    config = resolve_data_config({}, model=model)
+    transform = create_transform(**config)
+    img = Image.open(p).convert('RGB')
+    tensor = transform(img).unsqueeze(0)
+    output = get_output(model, tensor)
+    probabilities = torch.nn.functional.softmax(output[0], dim=0)
+    get_imagenet_classes()
+    categories = structure_imagenet_classes("imagenet_classes.txt")
+    topn_prob, topn_catid = get_most_probable(probabilities, 3)
+    return display_results(topn_prob, topn_catid, categories)
+
+def save_frame(p, frame):
+    cv2.imwrite(p, frame)
+
+def path_current_frame(epoch_time):
+    return os.path.sep.join(['static', "output/capture_frame_analysis_{}.png".format(str(epoch_time).replace(":",''))])
+
 def gen_frames():
+    global capture, epoch_time
     camera = cv2.VideoCapture(0)  
     while True:
         success, frame = camera.read()  # read the camera frame
         if not success:
             break
         else:
-            ret, buffer = cv2.imencode('.jpg', frame)
-            frame = buffer.tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
+            if capture == 1:
+                start = perf_counter()
+                current_frame_path = path_current_frame(epoch_time)
+                save_frame(current_frame_path, frame)
+                dog_breed_guessed = guess_dog_breed(current_frame_path)
 
+                capturedImageBlurredWithText = captureImage(frame, epoch_time)
+                blurred_img = capturedImageBlurredWithText._blurred()
+                frame_blurred_with_text = capturedImageBlurredWithText._withText(dog_breed_guessed, blurred_img)
+                capturedImageBlurredWithText._save(frame_blurred_with_text)
 
-def main():
-    Main()
+                end = perf_counter()
+                total = end - start
+                print(f'total time to guess dog: {total} seconds!')
+                capture = 0
 
-class Main:
+            try:
+                if not capture:
+                    _, buffer = cv2.imencode('.jpg', frame)
+                    frame = buffer.tobytes()
+                    yield (b'--frame\r\n'
+                        b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+            except Exception as e:
+                print(f'exception when yielding frames : {e}')
+                pass
 
-    def __init__(self):
-        self.window_name = 'test'
-        self.cam = cv2.VideoCapture(0)
-        self.model_type = 'inception_v3'
-        self.is_pretrained = True
-        self.default_config = {}
-        self.imagenet_classes_url = "https://raw.githubusercontent.com/pytorch/hub/master/imagenet_classes.txt"
-        self.imagenet_classes_filename = "imagenet_classes.txt"
-        self.n = 3
-        self.font = cv2.FONT_HERSHEY_SIMPLEX
-        self.org = (200, 200) 
-        self.fontScale = 3
-        self.bgr_white_color = (255, 255, 255)
-        self.bgr_black_color = (0, 0, 0)
-        self.thickness = 3
-        self.output_dir = 'output/'  
-        self._main()
+def update_config(epoch_time):
+    return {
+        'display_video_feed': 'none',
+        'display_captured_img': 'flex',
+        'epoch_time': epoch_time,
+        'imageCapturedSuccess': True
+    }
 
-    def _guess_dog_breed(self):
-        self.model = self._create_model()
-        self._eval_model()
-        self.config = self._create_config()
-        self.transform = create_transform(**self.config)
-        self.img = self._open_and_convert_img_rgb()
-        self.tensor = self._create_tensor()
-        self.output = self._get_output()
-        self.probabilities = self._compute_probabilities()
-        self._get_imagenet_classes()
-        self.categories = self._structure_imagenet_classes()
-        self.topn_prob, self.topn_catid = self._get_most_probable()
-        self._display_results()
+@app.route('/requests',methods=['POST','GET'])
+def tasks():
+    global switch,camera,default_config
 
-    def _get_imagenet_classes(self):
-        ## imports a list of all the different classes (1000 in total) the CNN is trained upon
-        urllib.request.urlretrieve(self.imagenet_classes_url, self.imagenet_classes_filename)
-
-    def _structure_imagenet_classes(self):
-        with open(self.imagenet_classes_filename, "r") as f:
-            return [s.strip() for s in f.readlines()]    
-
-    def _get_most_probable(self):
-        return torch.topk(self.probabilities, self.n)
-    
-    def _display_results(self):
-        for i in range(self.topn_prob.size(0)):
-            category_name = self.categories[self.topn_catid[i]]
-            prob = str(round(float(self.topn_prob[i].item()*100), 1)) + "%"
-            print(category_name, prob)
-        self.top_guess = str(self.categories[self.topn_catid[0]]).title()
-
-    def _open_and_convert_img_rgb(self):
-        return Image.open(self.img_name).convert('RGB')
-    
-    def _create_tensor(self):
-        return self.transform(self.img).unsqueeze(0)
-
-    def _compute_probabilities(self):
-        return torch.nn.functional.softmax(self.output[0], dim=0)
-
-    def _get_output(self):
-        with torch.no_grad():
-            return self.model(self.tensor)
-
-    def _create_config(self):
-        try:
-            return resolve_data_config(self.default_config, model=self.model)
-        except AssertionError:
-            print('First, we need to create our pyTorch IMage Model (TIMM)!')
-            sys.exit()
-        
-    def _create_model(self):
-        return timm.create_model(self.model_type, pretrained=self.is_pretrained)
-    
-    def _eval_model(self):
-        return self.model.eval()
-
-    def _space_key_pressed(self) -> bool:
-        if self.k%256 == 32:
-            return True
-        return False
-    
-    def _esc_key_pressed(self) -> bool:
-        ## need to map the space key to the Idexx image icon
-        if self.k%256 == 27:
-            return True
-        return False
-    
-    def _capture_img(self):
-        cv2.imwrite(self.img_name, self.frame)
-
-    def _pause_video(self):
-        cv2.waitKey(-1)
-
-    def _get_epoch_nano(self):
-        return time.time_ns()
-    
-    def _blur_frame(self):
-        self.kernal_size = (100,100)
-        self.blurred_frame = cv2.blur(self.frame, self.kernal_size)
-        cv2.imshow(self.window_name, self.blurred_frame)
-
-    def _put_text_on_blurred_frame(self):
-        return cv2.putText(
-            self.blurred_frame,
-            self.top_guess,
-            self.org, self.font,
-            self.fontScale,
-            self.bgr_white_color,
-            self.thickness,
-            cv2.LINE_AA
-        ) 
-
-    def _display_top_guess(self):
-        self.blurred_frame_with_text = self._put_text_on_blurred_frame()
-        cv2.imshow(self.window_name, self.blurred_frame_with_text)  
-
-    def _main(self):
-        cv2.namedWindow(self.window_name)
-        while True:
-            self.ret, self.frame = self.cam.read()
-            if not self.ret:
-                print("failed to grab frame")
-                break
-            cv2.imshow(self.window_name, self.frame)
-            self.k = cv2.waitKey(1)
-            if self._esc_key_pressed():
-                break
-            elif self._space_key_pressed():
-                self.epoch_nano = self._get_epoch_nano()
-                self.img_name = f'{self.output_dir }{self.epoch_nano}.jpg'
-                self._capture_img()
-                self._guess_dog_breed()
-                self._blur_frame()
-                self._display_top_guess()
-                self._pause_video()
-
-        self.cam.release()
-
-        cv2.destroyAllWindows()
-
+    if request.method == 'POST':
+        if request.form.get('click') == 'guess':
+            global capture, epoch_time, default_config
+            epoch_time = time.time_ns()
+            capture=1
+            ## this is how long it takes to save the captured frame, read it from disc, and guess what it is
+            time.sleep(1)
+            ## TODO: spawn up a new thread that does something entertaining within 1 second
+            updated_config = update_config(epoch_time)
+            return render_template('index.html', data=updated_config)
+    elif request.method=='GET':
+        return render_template('index.html', data=default_config)
+    return render_template('index.html', data=default_config)
 
 if __name__ == '__main__':
-    # app.run(host="0.0.0.0", port=FLASK_PORT)
+    ## debug true lets us update our code without restarting the server
+    ## in prod, we can't do this
     app.run(debug=True)
-    # main()

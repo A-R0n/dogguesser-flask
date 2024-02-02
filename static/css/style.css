@@ -1,0 +1,59 @@
+.col-lg-8 {
+    position: relative;
+    top: 0;
+    left: 0;
+}
+
+#video_feed {
+    position: relative;
+    top: 0;
+    left: 0;
+    border: 1px red solid;
+    width: 100%;
+    height: 100%;
+}
+
+#deleteButton{
+    left:0px;
+    position: absolute;
+}
+
+#camera_click_button {
+    position: absolute;
+    background-color: Transparent;
+    border: none;
+    left: 22;
+    top: -23;
+    background: transparent;
+    color: white;
+}
+
+#camera_click_button, #submitForm{
+    width: 120px;
+    height: 165px;
+}
+
+#submitForm {
+    background: url('dog-silhouette.svg') transparent no-repeat;
+    background-size: contain;
+
+    position: absolute;
+    top: 80%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: pulse 1.5s infinite;
+  }
+
+@keyframes pulse {
+    0% {
+        transform: scale(0.95);
+    }
+
+    70% {
+        transform: scale(1);
+    }
+
+    100% {
+        transform: scale(0.95);
+    }
+}

@@ -1,55 +1,41 @@
 <html>
-    <style>
-        .col-lg-8 {
-        position: relative;
-        top: 0;
-        left: 0;
-        }
-        .video_feed {
-        position: relative;
-        top: 0;
-        left: 0;
-        border: 1px red solid;
-        }
-        .camera_click_button {
-        position: absolute;
-        border-radius: 50%;
-        transform: scale(1);
-        transform: translate(-50%, -50%);
-	    animation: pulse 1.5s infinite;
-        width: 75px;
-        height: 75px;
-        top: 85%;
-        left: 50%;
-        border: 1px green solid;
-        }
-
-        @keyframes pulse {
-            0% {
-                transform: scale(0.95);
-                box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.7);
-            }
-
-            70% {
-                transform: scale(1);
-                box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
-            }
-
-            100% {
-                transform: scale(0.95);
-                box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
-            }
-        }
-      </style>
+    <head>
+        <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">
+    </head>
     <body>
-        <div class="container">
+        <div class="container" >
             <div class="row">
-                <div class="col-lg-8">
-                    <h3 class="mt-5">Live Streaming</h3>
-                    <img src="{{ url_for('video_feed') }}" class="video_feed">
-                    <img src="{{url_for('static', filename='camera_click_button.jpeg')}}" class="camera_click_button">
+                <div class="col-lg-8" style="visibility: hidden">
+                    <img src="{{ url_for('video_feed') }}" id="video_feed" style="display: {{data.display_video_feed}};" onload="make_component_visible()">
+                    <form method="post" action="{{ url_for('tasks') }}" id="submitForm">                        
+                        <input type="submit" value='guess' name="click" id="camera_click_button" style="display: {{data.display_video_feed}};"/>
+                    </form>
+                    {% if data.imageCapturedSuccess %}
+                    <div style="position:relative;" id="captured_img">
+                        <button type="submit" id="deleteButton" onclick="show_original_display()">
+                        <span>&times;</span>
+                        </button>
+                        <img src="../static/output/capture_frame_blur_{{data.epoch_time}}.png" alt="dog breed guess" width="100%" height="100%" id="dog_breed_guess">
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </body>
+    <script>
+        function make_component_visible() {
+            // we were having everything rendered before the video finished loading and we dont want that
+            console.log("video on load");
+            var collg8 = document.querySelector('.col-lg-8');
+            collg8.style.visibility = 'visible';
+        }
+        function show_original_display() {
+            var capturedImg = document.getElementById('captured_img');
+            capturedImg.style.display = 'none';
+            var videoFeed = document.getElementById('video_feed');
+            videoFeed.style.display = 'flex';
+            var cameraClickButton = document.getElementById('camera_click_button');
+            cameraClickButton.style.display = 'flex';
+        }
+    </script>
 </html>
