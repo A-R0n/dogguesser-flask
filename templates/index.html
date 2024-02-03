@@ -11,13 +11,15 @@
                         <input type="submit" value='guess' name="click" id="camera_click_button" style="display: {{data.display_video_feed}};"/>
                     </form>
                     {% if data.imageCapturedSuccess %}
-                    <div style="position:relative;" id="captured_img">
-                        <button type="submit" class="btn-close" onclick="show_original_display()">
-                            <span class="icon-cross"></span>
-                            <span class="visually-hidden">Close</span>
-                        </button>
-                        <img src="../static/output/capture_frame_blur_{{data.epoch_time}}.png" alt="dog breed guess" width="100%" height="100%" id="dog_breed_guess">
-                    </div>
+                    <form method="post" action="{{ url_for('tasks') }}">
+                        <div style="position:relative;" id="captured_img">
+                            <button type="submit" class="btn-close" value='remove' name="dog" onclick="show_original_display()">
+                                <span class="icon-cross"></span>
+                                <span class="visually-hidden">Close</span>
+                            </button>
+                            <img src="../static/output/capture_frame_blur_{{data.epoch_time}}.png" alt="dog breed guess" width="100%" height="100%" id="dog_breed_guess">
+                        </div>
+                    </form>
                     {% endif %}
                 </div>
             </div>
