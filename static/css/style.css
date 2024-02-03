@@ -8,16 +8,68 @@
     position: relative;
     top: 0;
     left: 0;
-    border: 1px red solid;
     width: 100%;
     height: 100%;
 }
 
-#deleteButton{
-    left:0px;
+.btn-close {
     position: absolute;
-}
-
+    /* margin: 0; */
+    border: 0;
+    margin: 10px;
+    background: #808080;
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 150ms;
+  }
+  .btn-close .icon-cross {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    position: relative;
+    width: 40px;
+    height: 40px;
+  }
+  .btn-close .icon-cross:before, .btn-close .icon-cross:after {
+    content: '';
+    position: absolute;
+    top: 17px;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: #fff;
+    border-radius: 6px;
+  }
+  .btn-close .icon-cross:before {
+    transform: rotate(45deg);
+  }
+  .btn-close .icon-cross:after {
+    transform: rotate(-45deg);
+  }
+  .btn-close .icon-cross span {
+    display: block;
+  }
+  .btn-close:hover, .btn-close:focus {
+    transform: rotateZ(90deg);
+    background: #696969;
+  }
+  .visually-hidden {
+    position: absolute !important;
+    clip: rect(1px, 1px, 1px, 1px);
+    padding: 0 !important;
+    border: 0 !important;
+    height: 1px !important;
+    width: 1px !important;
+    overflow: hidden;
+  }
+  
 #camera_click_button {
     position: absolute;
     background-color: Transparent;
@@ -46,7 +98,7 @@
 
 @keyframes pulse {
     0% {
-        transform: scale(0.95);
+        transform: scale(0.90);
     }
 
     70% {
@@ -54,6 +106,6 @@
     }
 
     100% {
-        transform: scale(0.95);
+        transform: scale(0.90);
     }
 }

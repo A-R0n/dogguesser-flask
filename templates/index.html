@@ -12,8 +12,9 @@
                     </form>
                     {% if data.imageCapturedSuccess %}
                     <div style="position:relative;" id="captured_img">
-                        <button type="submit" id="deleteButton" onclick="show_original_display()">
-                        <span>&times;</span>
+                        <button type="submit" class="btn-close" onclick="show_original_display()">
+                            <span class="icon-cross"></span>
+                            <span class="visually-hidden">Close</span>
                         </button>
                         <img src="../static/output/capture_frame_blur_{{data.epoch_time}}.png" alt="dog breed guess" width="100%" height="100%" id="dog_breed_guess">
                     </div>
