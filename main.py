@@ -206,4 +206,5 @@ def tasks():
 if __name__ == '__main__':
     ## debug true lets us update our code without restarting the server
     ## in prod, we can't do this
-    app.run(debug=True)
+    # app.run(debug=True)
+    app.run(debug=False)
