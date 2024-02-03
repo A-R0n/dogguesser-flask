@@ -83,6 +83,13 @@ def display_results(topn_prob, topn_catid, categories):
             return 'N/A'
     except IndexError:
         return "Index Error"
+    
+def does_blurred_image_exist() -> bool:
+    global epoch_time
+    blurred_image_fp = f'static/output/capture_frame_blur_{epoch_time}.png'
+    if os.path.isfile(blurred_image_fp):
+        return True
+    return False
 
 def blur_frame(frame):
     return cv2.blur(frame, (100,100))
@@ -132,9 +139,11 @@ def gen_frames():
                 end = perf_counter()
                 total = end - start
                 print(f'total time to guess dog: {total} seconds!')
-                capture = 0
+                # capture = 0
 
             try:
+                ## instead of if not capture
+                ## it should be if the captured image doesn't exist
                 if not capture:
                     _, buffer = cv2.imencode('.jpg', frame)
                     frame = buffer.tobytes()
@@ -152,22 +161,46 @@ def update_config(epoch_time):
         'imageCapturedSuccess': True
     }
 
+def get_file_size():
+    global epoch_time
+    file_stats = os.stat(f'static/output/capture_frame_blur_{epoch_time}.png')
+    return file_stats.st_size
+
 @app.route('/requests',methods=['POST','GET'])
 def tasks():
-    global switch,camera,default_config
+    global switch,camera,default_config,epoch_time
 
     if request.method == 'POST':
         if request.form.get('click') == 'guess':
             global capture, epoch_time, default_config
             epoch_time = time.time_ns()
             capture=1
-            ## this is how long it takes to save the captured frame, read it from disc, and guess what it is
-            time.sleep(1)
-            ## TODO: spawn up a new thread that does something entertaining within 1 second
+            while capture == 1:
+                if does_blurred_image_exist():
+                    file_size = get_file_size()
+                    print(f'file_size: {file_size}')
+                    ## we still have to wait cus itll find half the image to exist and render that
+                    if file_size > 0:
+                        ## it still might not be fully loaded even though a number is finally available to us
+                        time.sleep(.05)
+                        capture = 0
+                        break
+
             updated_config = update_config(epoch_time)
             return render_template('index.html', data=updated_config)
+        elif request.form.get('dog') == 'remove':
+            print(f'removing dog')
+            path_analysis = path_current_frame(epoch_time)
+            path_blurred = f'static/output/capture_frame_blur_{epoch_time}.png'
+            ps = [path_analysis, path_blurred]
+            for p in ps:
+                print(f'removing p {p}')
+                os.remove(p)
+            print(f'files removed from output...')
+            # return render_template('index.html', data=default_config)
     elif request.method=='GET':
         return render_template('index.html', data=default_config)
+
     return render_template('index.html', data=default_config)
 
 if __name__ == '__main__':
