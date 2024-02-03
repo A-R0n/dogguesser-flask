@@ -2,7 +2,7 @@ import cv2
 import sys
 import os
 
-X_Y_COORDINATE_TEXT = (850, 500)
+X_Y_COORDINATE_TEXT = (650, 500)
 
 import sys
 def captureImage(v, x):
