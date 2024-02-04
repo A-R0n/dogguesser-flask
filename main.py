@@ -212,8 +212,8 @@ def tasks():
 if __name__ == '__main__':
     ## debug true lets us update our code without restarting the server
     ## in prod, we can't do this
-    app.run(debug=True)
-    # app.run()
+    # app.run(debug=True)
+    app.run()
     # app.run(ssl_context='adhoc')
     # context = ssl.SSLContext()
     # context.load_cert_chain('fullchain.pem', 'privkey.pem')
