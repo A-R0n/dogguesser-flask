@@ -10,6 +10,8 @@ from flask import Flask, render_template, Response, request
 import os
 from capture_image import captureImage
 from time import perf_counter
+# from guppy import hpy
+import ssl
 
 app = Flask(__name__)
 global capture, switch, epoch_time,default_config
@@ -197,6 +199,10 @@ def tasks():
                 print(f'removing p {p}')
                 os.remove(p)
             print(f'files removed from output...')
+            # h=hpy()
+            # print(f'app usage...')
+            # print(h.heap())
+            # time.sleep(10)
             # return render_template('index.html', data=default_config)
     elif request.method=='GET':
         return render_template('index.html', data=default_config)
@@ -206,5 +212,11 @@ def tasks():
 if __name__ == '__main__':
     ## debug true lets us update our code without restarting the server
     ## in prod, we can't do this
-    # app.run(debug=True)
-    app.run(debug=False)
+    app.run(debug=True)
+    # app.run()
+    # app.run(ssl_context='adhoc')
+    # context = ssl.SSLContext()
+    # context.load_cert_chain('fullchain.pem', 'privkey.pem')
+    # app.run(ssl_context="adhoc", debug=True)
+
+    # app.run(debug=False)
