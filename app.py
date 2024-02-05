@@ -32,8 +32,8 @@ BGR_WHITE_COLOR = (255, 255, 255)
 @app.route('/')
 def index():
     global default_config
-    return app.send_static_file('index.html')
-    # return render_template('index.html', data=default_config)
+    # return app.send_static_file('index.html')
+    return render_template('index.html', data=default_config)
 
 @app.route('/video_feed')
 def video_feed():
