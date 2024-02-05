@@ -13,8 +13,7 @@ from time import perf_counter
 # from guppy import hpy
 import ssl
 
-def main():
-    app.run()
+
 
 app = Flask(__name__)
 global capture, switch, epoch_time,default_config
@@ -31,6 +30,9 @@ default_config = {
 imagenet_classes_file = "imagenet_classes.txt"
 imagenet_classes_download = "https://raw.githubusercontent.com/pytorch/hub/master/imagenet_classes.txt"
 BGR_WHITE_COLOR = (255, 255, 255)
+
+def main():
+    app.run()
 
 @app.route('/')
 def index():
