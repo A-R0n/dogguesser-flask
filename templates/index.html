@@ -10,7 +10,10 @@
                 <!-- <div class="col-lg-8" style="visibility: visible"> -->
 
                     <!-- <img src="{{ url_for('video_feed') }}" id="video_feed" style="display: flex;"> -->
+                    <!-- this is the good one below -->
                     <img src="{{ url_for('video_feed') }}" id="video_feed" style="display: {{data.display_video_feed}};" onload="make_component_visible()">
+                    <!-- <video autoplay="true" id="video_feed"></video> -->
+
 
                     <form method="post" action="{{ url_for('tasks') }}" id="submitForm">                        
                         <input type="submit" value='guess' name="click" id="camera_click_button" style="display: {{data.display_video_feed}};"/>
@@ -35,21 +38,21 @@
             If you can see this message, there is likely a problem loading the Overviewer JavaScript components.
             Check the JavaScript console for error messages.
         </noscript>
+        <script>
+            function make_component_visible() {
+                // we were having everything rendered before the video finished loading and we dont want that
+                console.log("video on load");
+                var collg8 = document.querySelector('.col-lg-8');
+                collg8.style.visibility = 'visible';
+            }
+            function show_original_display() {
+                var capturedImg = document.getElementById('captured_img');
+                capturedImg.style.display = 'none';
+                var videoFeed = document.getElementById('video_feed');
+                videoFeed.style.display = 'flex';
+                var cameraClickButton = document.getElementById('camera_click_button');
+                cameraClickButton.style.display = 'flex';
+            }
+        </script>
     </body>
-    <script>
-        function make_component_visible() {
-            // we were having everything rendered before the video finished loading and we dont want that
-            console.log("video on load");
-            var collg8 = document.querySelector('.col-lg-8');
-            collg8.style.visibility = 'visible';
-        }
-        function show_original_display() {
-            var capturedImg = document.getElementById('captured_img');
-            capturedImg.style.display = 'none';
-            var videoFeed = document.getElementById('video_feed');
-            videoFeed.style.display = 'flex';
-            var cameraClickButton = document.getElementById('camera_click_button');
-            cameraClickButton.style.display = 'flex';
-        }
-    </script>
 </html>
