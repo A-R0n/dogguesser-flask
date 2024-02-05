@@ -13,7 +13,7 @@ from time import perf_counter
 # from guppy import hpy
 import ssl
 
-app = Flask(__name__, static_url_path='')
+app = Flask(__name__)
 global capture, switch, epoch_time,default_config
 epoch_time = None
 capture = 0
