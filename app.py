@@ -19,8 +19,8 @@ app = Flask(__name__)
 app.wsgi_app = ProxyFix(
     app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
 )
-# VIDEO_CAPTURE_NUM = 0
-VIDEO_CAPTURE_NUM = -1
+VIDEO_CAPTURE_NUM = 0
+# VIDEO_CAPTURE_NUM = -1
 # print(f'hi')
 # import sys
 # sys.exit()
