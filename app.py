@@ -37,6 +37,7 @@ def main():
 @app.route('/')
 def index():
     global default_config
+    print(f'default_config: {default_config}')
     # return app.send_static_file('index.html')
     return render_template('index.html', data=default_config)
 
