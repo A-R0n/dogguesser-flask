@@ -13,5 +13,5 @@ with open(activate_this) as f:
     exec(f_.read(), dict(__file__=activate_this))
 
 # Import and run the Flask app
-from app import app
-application = app()
+from app import main
+application = main()

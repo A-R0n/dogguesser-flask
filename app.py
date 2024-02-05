@@ -13,6 +13,9 @@ from time import perf_counter
 # from guppy import hpy
 import ssl
 
+def main():
+    app.run()
+
 app = Flask(__name__)
 global capture, switch, epoch_time,default_config
 epoch_time = None
@@ -214,7 +217,7 @@ if __name__ == '__main__':
     ## debug true lets us update our code without restarting the server
     ## in prod, we can't do this
     # app.run(debug=True)
-    app.run()
+    main()
     # app.run(ssl_context='adhoc')
     # context = ssl.SSLContext()
     # context.load_cert_chain('fullchain.pem', 'privkey.pem')
