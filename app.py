@@ -13,7 +13,7 @@ from time import perf_counter
 # from guppy import hpy
 import ssl
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='')
 global capture, switch, epoch_time,default_config
 epoch_time = None
 capture = 0
@@ -32,7 +32,8 @@ BGR_WHITE_COLOR = (255, 255, 255)
 @app.route('/')
 def index():
     global default_config
-    return render_template('index.html', data=default_config)
+    return app.send_static_file('index.html')
+    # return render_template('index.html', data=default_config)
 
 @app.route('/video_feed')
 def video_feed():
