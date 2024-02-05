@@ -12,10 +12,18 @@ from capture_image import captureImage
 from time import perf_counter
 # from guppy import hpy
 import ssl
-
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(
+    app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
+)
+# VIDEO_CAPTURE_NUM = 0
+VIDEO_CAPTURE_NUM = -1
+# print(f'hi')
+# import sys
+# sys.exit()
 global capture, switch, epoch_time,default_config
 epoch_time = None
 capture = 0
@@ -128,7 +136,7 @@ def path_current_frame(epoch_time):
 
 def gen_frames():
     global capture, epoch_time
-    camera = cv2.VideoCapture(0)  
+    camera = cv2.VideoCapture(VIDEO_CAPTURE_NUM)  
     while True:
         success, frame = camera.read()  # read the camera frame
         if not success:
