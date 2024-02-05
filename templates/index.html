@@ -12,13 +12,11 @@
                     <!-- <img src="{{ url_for('video_feed') }}" id="video_feed" style="display: flex;"> -->
                     <!-- this is the good one below -->
                     <img src="{{ url_for('video_feed') }}" id="video_feed" style="display: {{data.display_video_feed}};" onload="make_component_visible()">
-                    <!-- <video autoplay="true" id="video_feed"></video> -->
+                    <!-- <video autoplay="true" id="videoElement"></video> -->
 
-
-                    <form method="post" action="{{ url_for('tasks') }}" id="submitForm">                        
-                        <input type="submit" value='guess' name="click" id="camera_click_button" style="display: {{data.display_video_feed}};"/>
-                        <!-- <input type="submit" value='guess' name="click" id="camera_click_button" style="display: flex"/> -->
-
+                    <!-- <button value='guess' name="click" id="stop_button" onclick="stop()">Stop</button> -->
+                    <form method="post" action="{{ url_for('tasks') }}" id="submitForm">
+                        <input type="submit" value='guess' name="click" id="camera_click_button" style="display: {{data.display_video_feed}};"/> 
                     </form>
                     {% if data.imageCapturedSuccess %}
                     <form method="post" action="{{ url_for('tasks') }}">
@@ -39,6 +37,32 @@
             Check the JavaScript console for error messages.
         </noscript>
         <script>
+            var video = document.querySelector("#videoElement");
+
+            if (navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function (stream) {
+                video.srcObject = stream;
+                })
+                .catch(function (err0r) {
+                console.log("Something went wrong!");
+                });
+            }
+            function stop(e) {
+                console.log("clicking button")
+                var video = document.querySelector("#videoElement");
+                video.pause();
+                video.currentTime = 0;
+                var stream = video.srcObject;
+                var tracks = stream.getTracks();
+
+                for (var i = 0; i < tracks.length; i++) {
+                    var track = tracks[i];
+                    track.stop();
+                }
+
+                video.srcObject = null;
+            }
             function make_component_visible() {
                 // we were having everything rendered before the video finished loading and we dont want that
                 console.log("video on load");
