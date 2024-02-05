@@ -6,15 +6,15 @@
         <div class="container" >
             <h1>Test</h1>
             <div class="row">
-                <div class="col-lg-8" style="visibility: hidden">
-                <!-- <div class="col-lg-8" style="visibility: visible"> -->
+                <!-- <div class="col-lg-8" style="visibility: hidden"> -->
+                <div class="col-lg-8" style="visibility: visible">
 
-                    <!-- <img src="{{ url_for('video_feed') }}" id="video_feed" style="display: flex;"> -->
-                    <img src="{{ url_for('video_feed') }}" id="video_feed" style="display: {{data.display_video_feed}};" onload="make_component_visible()">
+                    <img src="{{ url_for('video_feed') }}" id="video_feed" style="display: flex;">
+                    <!-- <img src="{{ url_for('video_feed') }}" id="video_feed" style="display: {{data.display_video_feed}};" onload="make_component_visible()"> -->
 
                     <form method="post" action="{{ url_for('tasks') }}" id="submitForm">                        
-                        <input type="submit" value='guess' name="click" id="camera_click_button" style="display: {{data.display_video_feed}};"/>
-                        <!-- <input type="submit" value='guess' name="click" id="camera_click_button" style="display: flex"/> -->
+                        <!-- <input type="submit" value='guess' name="click" id="camera_click_button" style="display: {{data.display_video_feed}};"/> -->
+                        <input type="submit" value='guess' name="click" id="camera_click_button" style="display: flex"/>
 
                     </form>
                     {% if data.imageCapturedSuccess %}
